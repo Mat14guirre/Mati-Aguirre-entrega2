@@ -7,6 +7,7 @@ import productsRouter from './routes/products.router.js';
 import cartsRouter from './routes/carts.router.js'
 import { productsManager } from './filesystem/productsManager.js';
 import { cartsManager } from './filesystem/cartsManager.js';
+import { Server } from 'socket.io';
 
 const app = express();
 const midd1 = (req, res, next) => {
@@ -37,6 +38,20 @@ app.use('/api/carts',cartsRouter); // paquete de rutas CARRITO
 app.use('/static', express.static(`${config.DIRNAME}/public`)); //paquete de rutas ESTATICAS
 
 
-app.listen (config.PORT, () => {
-    console.log(`Servidor activo en puerto ${config.PORT}`);
+const httpServer = app.listen(config.PORT, () => {
+    console.log(`Server activo en puerto ${config.PORT}`);
+});
+
+const socketServer = new Server(httpServer);
+app.set('socketServer', socketServer);
+
+socketServer.on('connection', socket => {
+    console.log(`Nuevo cliente conectado con id ${socket.id}`);
+
+    socket.on('init_message', data => {
+        console.log(data);
+    });
+
+    socket.emit('welcome', `Bienvenido cliente, estás conectado con el id ${socket.id}`);
+
 });
