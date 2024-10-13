@@ -1,0 +1,101 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.min.css">
+
+<div>
+    <h2>Lista de Productos en Tiempo Real</h2>
+</div>
+
+<div style="margin-top: 2em; border: 1px solid #666; padding: 1em; width: 360px;">
+    <p id="productList" style="padding: 0; margin: 0;"></p>
+</div>
+
+<div style="margin-left: 1em; margin-top: 2em;">
+    <input class="form-control" type="text" id="product" name="product" placeholder="Nombre del producto" style="width: 360px;">
+    <input class="form-control" type="number" id="price" name="price" placeholder="Precio" style="width: 360px;">
+    <button id="addProductButton" style="margin-top: 1em;">Agregar Producto</button>
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.all.min.js"></script>
+<script type="module">
+    const url = ''; // vacío para localhost
+    const options = {};
+    const productField = document.getElementById('product');
+    const priceField = document.getElementById('price');
+    const productList = document.getElementById('productList');
+    const addProductButton = document.getElementById('addProductButton');
+
+    const notify = (text) => {
+        Swal.fire({
+            text: text,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
+    };
+
+    const addProduct = () => {
+        if (productField.value !== '' && priceField.value !== '') {
+            const data = { name: productField.value, price: priceField.value };
+
+            // Enviar el nuevo producto al servidor
+            socketClient.emit('new_product', data);
+            
+            // Limpiar campos
+            productField.value = '';
+            priceField.value = '';
+        } else {
+            notify('Por favor, completa ambos campos.');
+        }
+    };
+
+    addProductButton.addEventListener('click', addProduct);
+    priceField.addEventListener('keyup', event => {
+        if (event.key === 'Enter') {
+            addProduct();
+        }
+    });
+
+    const deleteProduct = (productName) => {
+        socketClient.emit('delete_product', productName); // Emitir evento para eliminar
+        notify(`Producto eliminado: ${productName}`);
+    };
+
+    const renderProducts = (products) => {
+        productList.innerHTML = ''; // Limpiar lista
+        products.forEach(product => {
+            productList.innerHTML += `
+                <br />
+                <strong>${product.name}</strong> - $${product.price}
+                <button class="deleteButton" style="margin-left: 10px;" data-name="${product.name}">Eliminar</button>
+            `;
+        });
+    };
+
+    const socketClient = io(url, options);
+
+    socketClient.on('connect', () => {
+        console.log(`Conectado al servidor socket.io ${url}`);
+    });
+
+    socketClient.on('current_products', (data) => {
+        renderProducts(data);
+    });
+
+    socketClient.on('new_product', (data) => {
+        // Agregar el nuevo producto a la lista de productos existente
+        const currentProducts = [...productList.querySelectorAll('strong')].map(el => {
+            return { name: el.innerText, price: el.nextSibling.nodeValue.trim().slice(2) };
+        });
+        currentProducts.push(data);
+        renderProducts(currentProducts); // Renderizar la lista actualizada
+    });
+
+    productList.addEventListener('click', (event) => {
+        if (event.target.classList.contains('deleteButton')) {
+            const productName = event.target.getAttribute('data-name');
+            deleteProduct(productName);
+        }
+    });
+</script>
+

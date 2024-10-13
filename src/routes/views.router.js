@@ -34,10 +34,17 @@ router.get('/register', (req, res) => {
     res.status(200).render('register', data);
 });
 
-router.get('/chat',(req,res)=>{
+
+router.get('/realtimeproducts',(req,res)=>{
     const data={
     };
-    res.status(200).render('chat',data)
+    res.status(200).render('realtimeproducts',data)
+});
+
+router.get('/home',(req,res)=>{
+    const data={
+    };
+    res.status(200).render('home',data)
 })
 
 

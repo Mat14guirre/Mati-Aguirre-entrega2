@@ -44,8 +44,4 @@ router.post('/:cid/product/:pid', (req,res)=>{
     res.status(200).json(cart);
 });
 
-
-
-
-
 export default router;
