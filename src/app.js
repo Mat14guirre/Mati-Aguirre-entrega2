@@ -6,11 +6,14 @@ import viewsRouter from './routes/views.router.js';
 import productsRouter from './routes/products.router.js';
 import cartsRouter from './routes/carts.router.js'
 import initSocket from './sockets.js';
+import mongoose from 'mongoose';
 
 const app = express();
 
-const httpServer = app.listen(config.PORT, () => {
-    console.log(`Server activo en puerto ${config.PORT}`);
+const httpServer = app.listen(config.PORT, async () => {
+    await mongoose.connect(config.MONGODB_URI);
+
+    console.log(`Server activo en puerto ${config.PORT} conectado a bbdd`);
 
     const socketServer = initSocket(httpServer);
     app.set('socketServer', socketServer);
