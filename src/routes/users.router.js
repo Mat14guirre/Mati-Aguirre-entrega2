@@ -1,8 +1,11 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import { uploader } from '../uploader.js';
-import userModel from '../dao/models/user.model.js';
+import UserController from '../dao/users.controller.js';
+
 
 const router = Router();
+
+const controller = new UserController();
 
 const auth = (req, res, next) => {
     console.log('Ejecuta el middleware de autenticación de usuario');
@@ -10,34 +13,35 @@ const auth = (req, res, next) => {
 }
 
 router.get('/', async (req, res) => {
-    const data = await userModel.find().lean();
+    const data = await controller.get();
     res.status(200).send({ error: null, data: data });
 });
 
 router.post('/', auth, uploader.single('thumbnail'), async (req, res) => { 
-    const { firstName, lastName, email } = req.body; 
+    const { firstName, lastName, email } = req.body;
 
     if (firstName != '' && lastName != '' && email != '') {
-        const newUser = {  firstName, lastName, email };
-        const process = await userModel.create(newUser);
-        
-        const socketServer = req.app.get('socketServer');
-        socketServer.emit('new_user',newUser);
+        const newUser = { firstName: firstName, lastName: lastName, email: email };
+        const process = await controller.add(newUser);
 
+
+        const socketServer = req.app.get('socketServer');
+        socketServer.emit('new_user', newUser);
+        
         res.status(200).send({ error: null, data: process, file: req.file });
     } else {
         res.status(400).send({ error: 'Faltan campos obligatorios', data: [] });
     }
 });
 
-router.put('/:id', auth,async (req, res) => {
-    const {id} = req.params;
-    const {firstName,lastName,email} = req.body;
-    const filter = {_id: id};
-    const updated = {firstName: firstName, lastName:lastName, email:email};
-    const options = {new:true};
+router.put('/:id', auth, async (req, res) => {
+    const { id } = req.params;
+    const { firstName, lastName, email } = req.body;
+    const filter = { _id: id };
+    const updated = { firstName: firstName, lastName: lastName, email: email };
+    const options = { new: true };
 
-    const process = await userModel.findOneAndUpdate(filter, updated,options);    
+    const process = await controller.update(filter, updated, options);
     
     if (process) {
         res.status(200).send({ error: null, data: process });
@@ -49,8 +53,9 @@ router.put('/:id', auth,async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
     const { id } = req.params;
     const filter = { _id: id };
+    const options = {};
 
-    const process = await userModel.findOneAndDelete(filter);
+    const process = await controller.delete(filter, options);
     
     if (process) {
         res.status(200).send({ error: null, data: 'Usuario borrado' });
@@ -58,5 +63,6 @@ router.delete('/:id', auth, async (req, res) => {
         res.status(404).send({ error: 'No se encuentra el usuario', data: [] });
     }
 });
+
 
 export default router;

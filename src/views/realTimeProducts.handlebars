@@ -16,6 +16,10 @@
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.all.min.js"></script>
+
+
+
+
 <script type="module">
     const url = ''; // vacío para localhost
     const options = {};
@@ -66,7 +70,7 @@
         products.forEach(product => {
             productList.innerHTML += `
                 <br />
-                <strong>${product.name}</strong> - $${product.price}
+                <strong>${product.name}</strong> - ${product.price}
                 <button class="deleteButton" style="margin-left: 10px;" data-name="${product.name}">Eliminar</button>
             `;
         });

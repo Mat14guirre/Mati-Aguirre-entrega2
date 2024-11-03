@@ -3,11 +3,11 @@ import config from './config.js';
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        console.log('Ejecuta el midd de subida de archivos');
         cb(null, config.UPLOAD_DIR);
     },
 
     filename: (req, file, cb) => {
+        // cb(null, `${now}_${originalName}.${originalExtension}`);
         cb(null, file.originalname);
     }
 });

@@ -1,47 +1,12 @@
-import {Router} from 'express';
+import { Router } from 'express';
+import CartController from '../dao/carts.controller.js';
 
 const router = Router();
+const controller = new CartController();
 
-let carts = [];
-let cartId= 1 ;
-
-router.post('/',(req,res)=>{
-    const newCart={id:cartId++, products: []};
-    carts.push (newCart);
-    res.status(201).json(newCart);
-});
-
-router.get('/:cid',(req,res)=>{
-    const cid= parseInt(req.params.cid);
-    const cart = carts.find (c=> c.id === cid);
-    if (!cart){
-        return res.status(404).json('carrito no encontrado')
-    }
-    res.json(cart.products);
-});
-
-router.post('/:cid/product/:pid', (req,res)=>{
-    const cid = parseInt (req.params.cid);
-    const pid = parseInt (req.params.pid);
-    const cart = carts.find(c=>c.id===cid);
-
-    if(!cart){
-        return res.status(404).json('carrito no encontrado')
-    }
-    const productExist= cart.products.find(p=> p.product ===pid);
-
-    if(productExist){
-        productExist.quantity +=1 ;
-    }else {
-        const newProduct={
-        product: pid,
-        quantity: 1
-        };
-    
-    cart.products.push(newProduct);
-    };
-    
-    res.status(200).json(cart);
+router.get('/', async (req, res) => {
+    const data = await controller.get();
+    res.status(200).send({ error: null, data: data });
 });
 
 export default router;

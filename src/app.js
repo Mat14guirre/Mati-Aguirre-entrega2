@@ -7,6 +7,7 @@ import productsRouter from './routes/products.router.js';
 import cartsRouter from './routes/carts.router.js'
 import initSocket from './sockets.js';
 import mongoose from 'mongoose';
+import ordersRouter from './routes/orders.router.js';
 
 const app = express();
 
@@ -31,11 +32,12 @@ const httpServer = app.listen(config.PORT, async () => {
     app.engine('handlebars', handlebars.engine()); // motor de plantilla HANDLEBARS
     app.set ('views', `${config.DIRNAME}/views`);
     app.set ('view engine','handlebars');
-    
     app.use('/views',viewsRouter); //servicio de plantillas para vistas
+    
     app.use('/api/users', usersRouter); //paquete de rutas USUARIOS
     app.use('/api/products',productsRouter); //paquete rutas PRODUCTOS
     app.use('/api/carts',cartsRouter); // paquete de rutas CARRITO
+    app.use('/api/orders', ordersRouter);
     
     app.use('/static', express.static(`${config.DIRNAME}/public`)); //paquete de rutas ESTATICAS
     });

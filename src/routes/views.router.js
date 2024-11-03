@@ -1,9 +1,10 @@
 import { Router } from 'express';
+import OrderController from '../dao/orders.controller.js';
 
 
-const router = Router();
+const  router = Router();
 
-
+const controller = new OrderController();
 //array con usuarios de prueba
 const users = [
     { id: 1, firstName: 'Juan', lastName: 'Perez' },
@@ -46,6 +47,21 @@ router.get('/home',(req,res)=>{
     };
     res.status(200).render('home',data)
 })
+
+router.get('/newproduct', (req, res) => {
+    const data = {};
+    
+    res.status(200).render('newproduct', data);
+});
+
+
+
+router.get('/orders/:pg?', async (req, res) => {
+    const pg = req.params.pg || 1;
+    const data = await controller.getPaginated(pg);
+    
+    res.status(200).render('orders', { orders: data });
+});
 
 
 export default router;
